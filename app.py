@@ -279,7 +279,7 @@ if uploaded_file:
         if st.button("Generate Summary", key="summary_btn", use_container_width=True):
             with st.spinner("Generating summary..."):
                 summary = ask_gemini(
-                    f"Summarize this content:\n{text[:5000]}",
+                    f"Summarize this content:\n{text[:2000]}",
                     personalities[persona]
                 )
             st.success("Summary Generated!")
@@ -300,7 +300,7 @@ if uploaded_file:
                     - Key concepts
                     - Important definitions
 
-                    {text[:5000]}
+                    {text[:2000]}
                     """,
                     personalities[persona]
                 )
@@ -322,7 +322,7 @@ if uploaded_file:
                     - Correct answer clearly mentioned
 
                     Content:
-                    {text[:5000]}
+                    {text[:2000]}
                     """,
                     personalities[persona]
                 )
