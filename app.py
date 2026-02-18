@@ -17,7 +17,7 @@ if not API_KEY:
     st.error("Please add your GEMINI_API_KEY to the .env file")
     st.stop()
 
-client = genai.Client(api_key=API_KEY)
+client = genai.Client()
 
 # -------------------------
 # PAGE CONFIG
