@@ -1,6 +1,7 @@
 streamlit
-google-generativeai
+google-genai
 pypdf
 faiss-cpu
 sentence-transformers
 numpy
+python-dotenv
