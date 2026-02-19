@@ -14,7 +14,7 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not API_KEY:
-    st.error("Please add your GEMINI_API_KEY to the .env file")
+    API_KEY = os.getenv("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
     st.stop()
 
 client = genai.Client()
@@ -36,6 +36,8 @@ st.markdown("""
     background: linear-gradient(180deg, #f8fafc 0%, #eef6fb 50%, #f1f5f9 100%);
     color: #0b1220;
     font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    max-width: 1000px !important;
+    margin: 0 auto !important;
   }
 
   /* Hero area */
@@ -56,14 +58,12 @@ st.markdown("""
   .hero h1 {
     font-size: 2.25rem;
     margin: 0 0 0.25rem 0;
-    background: linear-gradient(90deg,#4f46e5,#06b6d4,#60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #5b21b6 !important;
   }
 
   .hero .subtitle { color: #334155; margin: 0; font-size: 0.98rem; }
 
-  .hero-image img{ max-width: 320px; width:100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(16,24,40,0.08);} 
+    .hero-image img{ max-width: 320px; width:100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(16,24,40,0.08); filter: brightness(0.78) saturate(0.92); opacity: 0.95; }
 
   /* Soft cards */
   .stColumn{ background: rgba(255,255,255,0.8) !important; border: 1px solid rgba(15,23,42,0.04) !important; box-shadow: 0 8px 24px rgba(16,24,40,0.04) !important; border-radius: 12px !important; padding: 1.25rem !important;}
@@ -71,9 +71,25 @@ st.markdown("""
   .stColumn:hover{ transform: translateY(-4px); transition: all 0.28s ease; }
 
   /* Buttons */
-  .stButton>button{ background: linear-gradient(90deg,#4f46e5,#06b6d4); color: white !important; border-radius: 10px; padding: 0.6rem 1.2rem; box-shadow: 0 8px 20px rgba(79,70,229,0.12);} 
+  .stButton>button{ 
+    background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%) !important; 
+    color: #ffffff !important; 
+    border-radius: 12px !important; 
+    padding: 0.75rem 1.5rem !important; 
+    box-shadow: 0 8px 24px rgba(79,70,229,0.16) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+  } 
 
-  .stButton>button:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px rgba(79,70,229,0.18); }
+  .stButton>button:hover { 
+    transform: translateY(-3px) !important; 
+    box-shadow: 0 12px 32px rgba(79,70,229,0.24) !important;
+  }
+  
+  .stButton>button:active {
+    transform: translateY(-1px) !important;
+  }
 
   /* Inputs */
   .stTextInput input, .stChatInput input, .stFileUploader input{ background: white !important; border: 1px solid rgba(15,23,42,0.06) !important; color: #0b1220 !important; border-radius: 8px !important; padding: .6rem 0.9rem !important; }
@@ -83,8 +99,68 @@ st.markdown("""
   /* Chat message style */
   .stChatMessage{ background: linear-gradient(180deg, #ffffff, #f8fafc) !important; border-left: 4px solid rgba(99,102,241,0.16) !important; color: #0b1220 !important; }
 
+    /* Ensure markdown outputs (summary, notes, quiz, chat) are highly readable */
+    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span, .stMarkdown div {
+        color: #5b21b6 !important;
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important;
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Headings inside generated content */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, h1, h2, h3, h4, h5, h6 {
+        color: #5b21b6 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Code blocks and preformatted text */
+    .stMarkdown pre, .stMarkdown code {
+        background: #f3f4f6 !important;
+        color: #5b21b6 !important;
+        padding: 0.6rem !important;
+        border-radius: 8px !important;
+        overflow: auto !important;
+    }
+
+    /* Chat messages containing markdown (assistant/user) */
+    .stChatMessage .stMarkdown, .stChatMessage .stMarkdown p {
+        color: #5b21b6 !important;
+        font-weight: 500 !important;
+    }
+
   /* File uploader */
   .stFileUploader>div{ border: 1px dashed rgba(15,23,42,0.06) !important; background: rgba(255,255,255,0.6) !important; }
+  
+  .stFileUploader label, .stFileUploader div, .stFileUploader span, .stFileUploader p {
+    color: #5b21b6 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Info box styling */
+  .stInfo {
+    background: rgba(255,255,255,0.06) !important;
+    border-left: 4px solid rgba(255,255,255,0.08) !important;
+    padding: 0.6rem !important;
+    border-radius: 8px !important;
+    color: #5b21b6 !important;
+  }
+  
+  .stInfo p {
+    color: #5b21b6 !important;
+  }
+  
+  /* Labels and text styling for visibility */
+  label, .stLabel, .stCaption {
+    color: #5b21b6 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Tab and expander text */
+  .stTabs span, .stExpander span, .streamlit-expanderHeader {
+    color: #5b21b6 !important;
+    font-weight: 500 !important;
+  }
 
     /* Sidebar: purple -> pink gradient, light text for contrast */
     .stSidebar{
@@ -111,7 +187,7 @@ st.markdown("""
 
     /* Sidebar markdown/info styling */
     .stSidebar .stMarkdown, .stSidebar .stMarkdown p {
-        color: rgba(255,255,255,0.92) !important;
+        color: #ffffff !important;
     }
 
     .stSidebar .stInfo {
@@ -119,7 +195,7 @@ st.markdown("""
         border-left: 4px solid rgba(255,255,255,0.08) !important;
         padding: 0.6rem !important;
         border-radius: 8px !important;
-        color: rgba(255,255,255,0.95) !important;
+        color: #ffffff !important;
     }
 
   /* Floating decorative blobs */
@@ -235,19 +311,93 @@ st.markdown("""
 
 st.divider()
 
-# Sidebar for settings
-with st.sidebar:
-    st.markdown("### ⚙️ Settings")
-    persona = st.radio("Choose Teaching Style", list(personalities.keys()), 
-                       help="Select how the AI should explain concepts")
-    st.divider()
-    st.markdown("### 📖 About")
-    st.info("This AI Study Assistant uses RAG (Retrieval Augmented Generation) to provide accurate, context-aware answers from your PDF documents.")
+# Initialize teaching style in session state
+if "teaching_style" not in st.session_state:
+    st.session_state.teaching_style = "Friendly"
 
-# Main content area
-st.markdown("### 📤 Upload Your Study Material")
+# Premium Settings Section
+st.markdown("""
+<div style="padding: 2rem 0;">
+    <h2 style="color: #5b21b6; margin-bottom: 1.5rem; font-size: 1.8rem; font-weight: 700;">⚙️ Preferences</h2>
+    <div style="background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(6,182,212,0.08) 100%); 
+                border: 1px solid rgba(99,102,241,0.15); border-radius: 16px; padding: 2rem; 
+                box-shadow: 0 8px 32px rgba(15,23,42,0.08);">
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: #5b21b6; font-size: 0.95rem; font-weight: 600; margin: 0 0 1rem 0; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">Teaching Style</p>
+            <p style="color: #5b21b6; font-size: 0.9rem; margin: 0 0 1rem 0;">Choose how the AI explains concepts to match your learning preference</p>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Teaching Style Selection with visual feedback
+col1, col2 = st.columns(2, gap="medium")
+
+with col1:
+    if st.button("🎓 Friendly", use_container_width=True, key="friendly_btn",
+                 help="Simple explanations with examples and follow-up questions"):
+        st.session_state.teaching_style = "Friendly"
+        st.rerun()
+
+with col2:
+    if st.button("📚 Academic", use_container_width=True, key="academic_btn",
+                 help="Structured, professional explanations with key concepts"):
+        st.session_state.teaching_style = "Academic"
+        st.rerun()
+
+# Display selected style with visual confirmation
+selected_style = st.session_state.teaching_style
+if selected_style == "Friendly":
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 100%); 
+                border-left: 4px solid #22c55e; border-radius: 8px; padding: 0.75rem 1rem; 
+                margin-top: 1rem;">
+        <p style="color: #5b21b6; margin: 0; font-size: 0.9rem; font-weight: 600;">✓ Active: <strong>Friendly Mode</strong></p>
+        <p style="color: #5b21b6; margin: 0.5rem 0 0 0; font-size: 0.85rem;">Simple explanations with examples</p>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 100%); 
+                border-left: 4px solid #22c55e; border-radius: 8px; padding: 0.75rem 1rem; 
+                margin-top: 1rem;">
+        <p style="color: #5b21b6; margin: 0; font-size: 0.9rem; font-weight: 600;">✓ Active: <strong>Academic Mode</strong></p>
+        <p style="color: #5b21b6; margin: 0.5rem 0 0 0; font-size: 0.85rem;">Structured professional explanations</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Set persona variable for use later
+persona = st.session_state.teaching_style
+
+st.divider()
+
+# Upload section
+st.markdown("""
+<div style="padding: 1.5rem 0;">
+    <h2 style="color: #5b21b6; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">📤 Upload Your Study Material</h2>
+    <p style="color: #5b21b6; margin: 0 0 1.5rem 0; font-size: 0.95rem;">Select a PDF document to get started with intelligent study assistance</p>
+</div>
+""", unsafe_allow_html=True)
+
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf", 
-                                 help="Upload a PDF to start learning!")
+                                 help="Upload a PDF document to analyze and learn from")
+
+# About Section
+st.markdown("""
+<div style="padding: 2rem 0; margin-top: 1rem;">
+    <h3 style="color: #5b21b6; margin-bottom: 1rem; font-size: 1.4rem; font-weight: 700;">📖 How It Works</h3>
+    <div style="background: linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(99,102,241,0.08) 100%); 
+                border: 1px solid rgba(6,182,212,0.15); border-radius: 16px; padding: 1.5rem;
+                box-shadow: 0 8px 32px rgba(15,23,42,0.08);">
+        <p style="color: #5b21b6; margin: 0; line-height: 1.8; font-size: 0.95rem;">
+            <strong style="color: #06b6d4;">🔍 Smart Retrieval:</strong> AI extracts relevant sections from your PDF<br><br>
+            <strong style="color: #06b6d4;">🧠 Intelligent Analysis:</strong> Gemini AI understands context and answers questions<br><br>
+            <strong style="color: #06b6d4;">📚 Multiple Tools:</strong> Generate summaries, study notes, quizzes, and more<br><br>
+            <strong style="color: #06b6d4;">⚡ Fast Processing:</strong> Get accurate answers in seconds
+        </p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 if "vector_index" not in st.session_state:
     st.session_state.vector_index = None
