@@ -271,8 +271,15 @@ def create_vector_store(chunks):
 def retrieve_context(query, index, chunks, k=3):
     query_embedding = embed_model.encode([query])
     D, I = index.search(np.array(query_embedding), k)
-    results = [chunks[i] for i in I[0]]
-    return "\n".join(results)
+
+    results = []
+    sources = []
+
+    for idx in I[0]:
+        results.append(chunks[idx])
+        sources.append(chunks[idx][:120] + "...")
+
+    return "\n".join(results), sources
 
 
 def ask_gemini(prompt, system_instruction):
@@ -493,11 +500,11 @@ user_input = st.chat_input("🔍 Type your question here...", key="chat_input")
 if user_input:
 
     if st.session_state.vector_index is not None:
-        context = retrieve_context(
-            user_input,
-            st.session_state.vector_index,
-            st.session_state.text_chunks
-        )
+        context, sources = retrieve_context(
+    user_input,
+    st.session_state.vector_index,
+    st.session_state.text_chunks
+)
 
         prompt = f"""
         Use the following context to answer the question accurately.
@@ -515,7 +522,8 @@ if user_input:
         response = ask_gemini(prompt, personalities[persona])
 
     st.session_state.chat_history.append(("user", user_input))
-    st.session_state.chat_history.append(("assistant", response))
+    source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
+st.session_state.chat_history.append(("assistant", source_text))
 
 # Display Chat with better styling
 st.divider()
