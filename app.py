@@ -523,7 +523,10 @@ if user_input:
 
     st.session_state.chat_history.append(("user", user_input))
     source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
-st.session_state.chat_history.append(("assistant", source_text))
+    st.session_state.chat_history.append(("assistant", response))
+    if st.session_state.vector_index is not None:
+     source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
+    st.session_state.chat_history.append(("assistant", source_text))
 
 # Display Chat with better styling
 st.divider()
