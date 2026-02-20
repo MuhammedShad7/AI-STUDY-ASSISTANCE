@@ -386,8 +386,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf", 
-                                 help="Upload a PDF document to analyze and learn from")
+uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
+help="Upload a PDF document to analyze and learn from. You can ask questions, generate summaries, and create quizzes based on the content of your PDF."
 
 # About Section
 st.markdown("""
@@ -415,14 +415,22 @@ if "chat_history" not in st.session_state:
 
 # PDF PROCESSING
 # -------------------------
-if uploaded_file:
-    with st.spinner("🔄 Processing your PDF... This may take a moment"):
-        text = extract_text_from_pdf(uploaded_file)
-        chunks = split_text(text)
+if uploaded_files:
+
+    all_text = ""
+
+    with st.spinner("🔄 Processing PDFs..."):
+        for file in uploaded_files:
+            text = extract_text_from_pdf(file)
+            all_text += text
+
+        chunks = split_text(all_text)
         index = create_vector_store(chunks)
 
         st.session_state.vector_index = index
         st.session_state.text_chunks = chunks
+
+    st.success(f"✅ {len(uploaded_files)} PDFs processed! ({len(chunks)} chunks created)")
 
     st.success(f"✅ PDF processed successfully! ({len(chunks)} chunks created)")
 
