@@ -502,39 +502,60 @@ if uploaded_files:
 st.divider()
 st.markdown("### 💬 Ask Questions About Your PDF")
 st.markdown("Get answers directly from your document using AI-powered search")
+if st.button("🔄 Reset Chat"):
+    st.session_state.chat_history = []
+    st.rerun()
 
 user_input = st.chat_input("🔍 Type your question here...", key="chat_input")
 
 if user_input:
+    history_text = ""
+    for role, msg in st.session_state.chat_history[-6:]:
+        history_text += f"{role}: {msg}\n"
 
+    # retrieve context if PDF uploaded
     if st.session_state.vector_index is not None:
         context, sources = retrieve_context(
-    user_input,
-    st.session_state.vector_index,
-    st.session_state.text_chunks
-)
+            user_input,
+            st.session_state.vector_index,
+            st.session_state.text_chunks
+        )
 
         prompt = f"""
-        Use the following context to answer the question accurately.
+You are having a conversation with a student.
 
-        Context:
-        {context}
+Conversation so far:
+{history_text}
 
-        Question:
-        {user_input}
-        """
+Use the following context to answer accurately.
+
+Context:
+{context}
+
+Question:
+{user_input}
+"""
+
     else:
-        prompt = user_input
+        prompt = f"""
+Conversation so far:
+{history_text}
+
+User question:
+{user_input}
+"""
 
     with st.spinner("🤔 Thinking..."):
         response = ask_gemini(prompt, personalities[persona])
 
+    # save chat
     st.session_state.chat_history.append(("user", user_input))
-    source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
     st.session_state.chat_history.append(("assistant", response))
+
+    # show sources if PDF used
     if st.session_state.vector_index is not None:
-     source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
-    st.session_state.chat_history.append(("assistant", source_text))
+        source_text = f"📖 Source Chunks: {', '.join(map(str, sources))}"
+        st.session_state.chat_history.append(("assistant", source_text))
 
 # Display Chat with better styling
 st.divider()
