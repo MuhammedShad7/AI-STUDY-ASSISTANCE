@@ -219,6 +219,7 @@ st.markdown("""
 # -------------------------
 # LOAD EMBEDDING MODEL (Cached)
 # -------------------------
+
 @st.cache_resource
 def load_embedding_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
@@ -276,8 +277,9 @@ def split_text(text, chunk_size=500):
     return chunks
 
 
+@st.cache_resource
 def create_vector_store(chunks):
-    embeddings = embed_model.encode(chunks)
+    embeddings = embed_model.encode(chunks, show_progress_bar=False)
     dimension = embeddings.shape[1]
     index = faiss.IndexFlatL2(dimension)
     index.add(np.array(embeddings))
@@ -406,9 +408,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
-help="Upload a PDF document to analyze and learn from. You can ask questions, generate summaries, and create quizzes based on the content of your PDF."
-
+uploaded_files = st.file_uploader(
+    "Choose PDF files",
+    type="pdf",
+    accept_multiple_files=True,
+    help="Upload PDFs to analyze and ask questions from."
+)
 # About Section
 st.markdown("""
 <div style="padding: 2rem 0; margin-top: 1rem;">
@@ -435,21 +440,25 @@ if "chat_history" not in st.session_state:
 
 # PDF PROCESSING
 # -------------------------
+import time
+
 if uploaded_files:
 
+    start_time = time.time()   # ← timing start
     all_text = ""
 
     with st.spinner("🔄 Processing PDFs..."):
         for file in uploaded_files:
-         text = extract_text_from_pdf(file)
+            text = extract_text_from_pdf(file)
 
-        if text:
-         all_text += text
-        else:
-         st.warning(f"⚠ Could not read {file.name}")
+            if text:
+                all_text += text
+            else:
+                st.warning(f"⚠ Could not read {file.name}")
+
         if all_text.strip() == "":
-         st.error("No readable text found in uploaded PDFs.")
-         st.stop() 
+            st.error("No readable text found in uploaded PDFs.")
+            st.stop()
 
         chunks = split_text(all_text)
         index = create_vector_store(chunks)
@@ -457,9 +466,10 @@ if uploaded_files:
         st.session_state.vector_index = index
         st.session_state.text_chunks = chunks
 
-    st.success(f"✅ {len(uploaded_files)} PDFs processed! ({len(chunks)} chunks created)")
+    elapsed = time.time() - start_time   # ← timing end
 
-    st.success(f"✅ PDF processed successfully! ({len(chunks)} chunks created)")
+    st.success(f"✅ {len(uploaded_files)} PDFs processed! ({len(chunks)} chunks created)")
+    st.info(f"⚡ Processed in {elapsed:.2f} seconds")
 
     st.markdown("### 🎯 Quick Actions")
     col1, col2, col3 = st.columns(3, gap="medium")
