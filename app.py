@@ -245,6 +245,22 @@ personalities = {
 # HELPER FUNCTIONS
 # -------------------------
 def extract_text_from_pdf(uploaded_file):
+    try:
+        reader = PdfReader(uploaded_file)
+        text = ""
+
+        for page in reader.pages:
+            if page.extract_text():
+                text += page.extract_text()
+
+        if text.strip() == "":
+            return None
+
+        return text
+
+    except Exception as e:
+        st.error("❌ Failed to read PDF.")
+        return None
     reader = PdfReader(uploaded_file)
     text = ""
     for page in reader.pages:
@@ -283,15 +299,19 @@ def retrieve_context(query, index, chunks, k=3):
 
 
 def ask_gemini(prompt, system_instruction):
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config={
-            "system_instruction": system_instruction,
-            "temperature": 0.4,
-        }
-    )
-    return response.text
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config={
+                "system_instruction": system_instruction,
+                "temperature": 0.4,
+            }
+        )
+        return response.text
+
+    except Exception:
+        return "⚠ AI service temporarily unavailable. Please try again."
 
 
 # -------------------------
@@ -421,8 +441,15 @@ if uploaded_files:
 
     with st.spinner("🔄 Processing PDFs..."):
         for file in uploaded_files:
-            text = extract_text_from_pdf(file)
-            all_text += text
+         text = extract_text_from_pdf(file)
+
+        if text:
+         all_text += text
+        else:
+         st.warning(f"⚠ Could not read {file.name}")
+        if all_text.strip() == "":
+         st.error("No readable text found in uploaded PDFs.")
+         st.stop() 
 
         chunks = split_text(all_text)
         index = create_vector_store(chunks)
