@@ -598,6 +598,6 @@ User question:
 st.divider()
 if st.session_state.chat_history:
     st.markdown("### 📚 Conversation History")
-    for role, message in reversed(st.session_state.chat_history):
+    for role, message in st.session_state.chat_history:
         with st.chat_message(role, avatar="👤" if role == "user" else "🤖"):
             st.markdown(message)
